@@ -13,6 +13,7 @@ import { localize, TranslationProvider } from '@deriv-com/translations';
 import CoreStoreProvider from './CoreStoreProvider';
 import i18nInstance from './i18n';
 import './app-root.scss';
+import LandingPage from '@/components/landing-page/landing-page';
 
 const Layout = lazy(() => import('../components/layout'));
 const AppRoot = lazy(() => import('./app-root'));
@@ -54,9 +55,9 @@ const router = createBrowserRouter(
                 </Suspense>
             }
         >
-            {/* All child routes will be passed as children to Layout */}
-            <Route index element={<AppRoot />} />
-            {/* App Builder embeds the template at /preview — render the same app shell */}
+            {/* Public landing page mirrors the workspace entry experience. */}
+            <Route index element={<LandingPage />} />
+            {/* App Builder embeds the trading workspace at /preview. */}
             <Route path='preview' element={<AppRoot />} />
         </Route>
     ),
