@@ -1,4 +1,32 @@
+import { initiateLogin, initiateSignUp } from '@/external/deriv-core';
 import './landing-page.scss';
+
+const DERIV_CLIENT_ID = process.env.NEXT_PUBLIC_DERIV_APP_ID;
+
+function getOAuthConfig() {
+    if (!DERIV_CLIENT_ID) {
+        throw new Error('Deriv OAuth is not configured for this deployment.');
+    }
+
+    return {
+        clientId: DERIV_CLIENT_ID,
+        redirectUri: `${window.location.origin}/`,
+        scopes: 'trade account_manage',
+    };
+}
+
+const startOAuth = (action: 'login' | 'signup') => {
+    try {
+        const config = getOAuthConfig();
+        void (action === 'login' ? initiateLogin(config) : initiateSignUp(config));
+    } catch (error) {
+        console.error('[v0] Deriv OAuth could not start:', error);
+        window.alert('Sign-in is temporarily unavailable. Please try again shortly.');
+    }
+};
+
+const goToLogin = () => startOAuth('login');
+const goToSignUp = () => startOAuth('signup');
 
 const markets = [
     'VOLATILITY 100 (1S) INDEX',
@@ -38,9 +66,9 @@ const LandingPage = () => (
             <span className='header-domain'>riskmanagers.site</span>
             <nav className='header-actions' aria-label='Account actions'>
                 <button className='theme-toggle' type='button' aria-label='Toggle color theme'>◐</button>
-                <button className='outline-button' type='button' onClick={goToWorkspace}>Log in</button>
-                <button className='outline-button' type='button' onClick={goToWorkspace}>API Token Login</button>
-                <button className='light-button' type='button' onClick={goToWorkspace}>Create Free Account</button>
+                <button className='outline-button' type='button' onClick={goToLogin}>Log in</button>
+                <button className='outline-button' type='button' onClick={goToLogin}>API Token Login</button>
+                <button className='light-button' type='button' onClick={goToSignUp}>Create Free Account</button>
             </nav>
         </header>
 
@@ -59,8 +87,8 @@ const LandingPage = () => (
             <h1>Welcome to <span>riskmanagers.site</span></h1>
             <p className='hero-copy'>Structured trading, built for focus. Build, load, and run Deriv bot strategies from a focused workspace<br className='desktop-break' /> made for everyday traders.</p>
             <div className='hero-actions'>
-                <button className='primary-button' type='button' onClick={goToWorkspace}><span aria-hidden='true'>⌁</span> Log in <b aria-hidden='true'>›</b></button>
-                <button className='secondary-button' type='button' onClick={goToWorkspace}><span aria-hidden='true'>ϟ</span> Create Free Account</button>
+                <button className='primary-button' type='button' onClick={goToLogin}><span aria-hidden='true'>⌁</span> Log in <b aria-hidden='true'>›</b></button>
+                <button className='secondary-button' type='button' onClick={goToSignUp}><span aria-hidden='true'>ϟ</span> Create Free Account</button>
             </div>
         </section>
 
