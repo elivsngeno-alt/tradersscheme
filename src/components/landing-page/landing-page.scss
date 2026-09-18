@@ -50,18 +50,10 @@
 .primary-button span, .secondary-button span { font-size: 18px; }
 .secondary-button { color: #182026; background: #f5f7f8; }
 
-.testimonials { padding: 0 0 71px; }
-.section-heading { position: relative; display: flex; justify-content: center; align-items: center; min-height: 87px; }
-.section-heading h2 { margin: 0; font-size: 14px; }
-.disclaimer { position: absolute; left: 12px; bottom: 14px; padding: 9px 12px; border-radius: 4px; color: #161b1e; background: #f4c21b; font-size: 10px; font-weight: 800; }
-.testimonial-row { display: flex; gap: 10px; width: max-content; transform: translateX(-32px); }
-.testimonial-card { width: 226px; min-height: 132px; padding: 14px; color: #263039; background: #f6f7f7; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.16); }
-.avatar { float: left; display: grid; place-items: center; width: 34px; height: 34px; margin-right: 10px; border-radius: 50%; font-size: 9px; font-weight: 800; }
-.avatar-0 { background: #d6a7d5; } .avatar-1 { background: #f5c83e; } .avatar-2 { background: #aabacc; } .avatar-3 { background: #71cfbb; } .avatar-4 { background: #f0a8d4; }
-.person { display: flex; flex-direction: column; gap: 3px; padding-top: 2px; }
-.person strong { font-size: 10px; } .person small { color: #778189; font-size: 7px; }
-.stars { clear: both; padding-top: 13px; color: #f0be1a; font-size: 10px; letter-spacing: 2px; }
-.testimonial-card p { margin: 7px 0 0; color: #566169; font-size: 9px; line-height: 1.45; }
+.live-workspace { position: relative; max-width: 720px; margin: 0 auto; padding: 28px 24px 72px; text-align: center; }
+.live-workspace h2 { margin: 0 0 8px; font-size: 16px; }
+.live-workspace p { margin: 0 auto; max-width: 560px; color: #7d898f; font-size: 11px; line-height: 1.6; }
+.disclaimer { display: inline-block; margin-bottom: 12px; padding: 9px 12px; border-radius: 4px; color: #161b1e; background: #f4c21b; font-size: 10px; font-weight: 800; }
 .landing-footer { padding: 11px 20px; border-top: 1px solid #806e38; color: #7e8588; font-size: 8px; text-align: center; }
 
 @media (max-width: 720px) {

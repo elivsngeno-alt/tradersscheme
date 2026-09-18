@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { initiateLogin, initiateSignUp } from '@/external/deriv-core';
 import './landing-page.scss';
 
@@ -28,26 +29,47 @@ const startOAuth = (action: 'login' | 'signup') => {
 const goToLogin = () => startOAuth('login');
 const goToSignUp = () => startOAuth('signup');
 
-const markets = [
-    'VOLATILITY 100 (1S) INDEX',
-    'VOLATILITY 100 INDEX',
-    'VOLATILITY 10 INDEX',
-    'VOLATILITY 25 INDEX',
-    'VOLATILITY 50 INDEX',
-    'VOLATILITY 75 INDEX',
-    'VOLATILITY 10 (1S) INDEX',
-    'VOLATILITY 25 (1S) INDEX',
-];
+const marketSymbols = [
+    ['R_100', 'Volatility 100 Index'],
+    ['R_75', 'Volatility 75 Index'],
+    ['R_50', 'Volatility 50 Index'],
+    ['R_25', 'Volatility 25 Index'],
+    ['R_10', 'Volatility 10 Index'],
+] as const;
 
-const testimonials = [
-    ['EO', 'Emmanuel Okwonkwo', 'Binary Options — Lagos, Nigeria', 'Solid tools for structured trading. The analysis section alone is worth the sign-up.'],
-    ['AK', 'Akosua Mensah', 'Volatility Trader — Accra, Ghana', 'I recommend this to every trader in my community — especially the free bot library.'],
-    ['TM', 'Tendai Moyo', 'Matches/Differs — Harare, Zimbabwe', 'Bulk Trader with barrier digits is a game changer. Smooth on mobile too.'],
-    ['CP', 'Chanda Phiri', 'Over/Under — Lusaka, Zambia', 'Clean layout, no clutter — I can focus on execution instead of fighting the UI.'],
-    ['YB', 'Yonas Bekele', 'Synthetic Indices — Addis Ababa, Ethiopia', 'The hub brings African traders and global Deriv tools together really well.'],
-    ['JR', 'James Reid', 'Bot Builder — London, UK', 'Professional-grade Blockly workspace with a landing page that actually explains the product.'],
-    ['ML', 'Maria Lopez', 'Volatility Trader — Madrid, Spain', 'I use it daily for back-testing ideas before deploying on my live Deriv account.'],
-];
+type LiveQuote = { symbol: string; name: string; quote?: number; direction?: 'up' | 'down' };
+
+const LiveMarketTicker = () => {
+    const [quotes, setQuotes] = useState<LiveQuote[]>(marketSymbols.map(([symbol, name]) => ({ symbol, name })));
+
+    useEffect(() => {
+        const appId = process.env.NEXT_PUBLIC_DERIV_APP_ID;
+        if (!appId) return;
+
+        const socket = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`);
+        socket.addEventListener('open', () => {
+            socket.send(JSON.stringify({ ticks: marketSymbols.map(([symbol]) => symbol), subscribe: 1 }));
+        });
+        socket.addEventListener('message', event => {
+            const message = JSON.parse(event.data) as { tick?: { symbol: string; quote: number } };
+            if (!message.tick) return;
+            setQuotes(current => current.map(quote => quote.symbol === message.tick?.symbol
+                ? { ...quote, quote: message.tick.quote, direction: quote.quote && message.tick.quote >= quote.quote ? 'up' : 'down' }
+                : quote));
+        });
+        return () => socket.close();
+    }, []);
+
+    return <div className='market-ticker' aria-label='Live Deriv market prices'>
+        <div className='ticker-track'>
+            {[...quotes, ...quotes].map((market, index) => (
+                <span key={`${market.symbol}-${index}`}>
+                    {market.name} <b>{market.quote === undefined ? 'CONNECTING' : market.quote.toFixed(2)}</b> <i>{market.direction === 'down' ? '▼' : '▲'}</i>
+                </span>
+            ))}
+        </div>
+    </div>;
+};
 
 const goToWorkspace = () => {
     window.location.href = '/preview';
@@ -65,22 +87,12 @@ const LandingPage = () => (
             </button>
             <span className='header-domain'>riskmanagers.site</span>
             <nav className='header-actions' aria-label='Account actions'>
-                <button className='theme-toggle' type='button' aria-label='Toggle color theme'>◐</button>
                 <button className='outline-button' type='button' onClick={goToLogin}>Log in</button>
-                <button className='outline-button' type='button' onClick={goToLogin}>API Token Login</button>
                 <button className='light-button' type='button' onClick={goToSignUp}>Create Free Account</button>
             </nav>
         </header>
 
-        <div className='market-ticker' aria-label='Live market instruments'>
-            <div className='ticker-track'>
-                {[...markets, ...markets].map((market, index) => (
-                    <span key={`${market}-${index}`}>
-                        {market} <b>—</b> <i>▲</i>
-                    </span>
-                ))}
-            </div>
-        </div>
+        <LiveMarketTicker />
 
         <section className='hero'>
             <p className='eyebrow'>FREE DERIV BOTS, AUTOMATION, AND TRADING TOOLS IN ONE WORKSPACE</p>
@@ -92,24 +104,10 @@ const LandingPage = () => (
             </div>
         </section>
 
-        <section className='testimonials' aria-labelledby='testimonials-title'>
-            <div className='section-heading'>
-                <span className='disclaimer'>▲ Risk Disclaimer</span>
-                <h2 id='testimonials-title'>What people say</h2>
-            </div>
-            <div className='testimonial-row'>
-                {testimonials.map(([initials, name, role, quote], index) => (
-                    <article className='testimonial-card' key={name}>
-                        <div className={`avatar avatar-${index % 5}`}>{initials}</div>
-                        <div className='person'>
-                            <strong>{name}</strong>
-                            <small>{role}</small>
-                        </div>
-                        <div className='stars' aria-label='5 out of 5 stars'>★★★★★</div>
-                        <p>{quote}</p>
-                    </article>
-                ))}
-            </div>
+        <section className='live-workspace' aria-labelledby='live-workspace-title'>
+            <span className='disclaimer'>Risk Disclaimer</span>
+            <h2 id='live-workspace-title'>Live Deriv workspace</h2>
+            <p>Prices above are streamed directly from Deriv. Sign in with your Deriv account to open the trading workspace and use your own account data.</p>
         </section>
 
         <footer className='landing-footer'>© 2026 riskmanagers.site. All rights reserved. © 2026 riskmanagers.site. All rights reserved.</footer>
